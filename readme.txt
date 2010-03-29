@@ -1,10 +1,10 @@
 === Plugin Name ===
-Contributors: Henrik
+Contributors: Ostlund
 Donate link:
 Tags: dropbox, upload
 Requires at least: 2.9.0
 Tested up to: 2.9.2
-Stable tag: 0.0.2
+Stable tag: 0.0.3
 
 Inserts a upload form for visitors to upload files to a Dropbox account
 
@@ -26,13 +26,16 @@ Yes indeed, so don't blame me if it breaks .
 
 = Do you want to give kudos to anyone? =
 
-Sure, big thanks to [Jaka Jancar](http://jaka.kubje.org/) for creating the Dropbox class.
+Sure, big thanks to [Jaka Jancar](http://jaka.kubje.org/) for creating the Dropbox class. The company I work for [inUse](http://inuse.se) for leting me release this plugin under GPL.
 
 == Screenshots ==
 
 1. This is how it looks on a page in Safari
 
 == Changelog ==
+
+= 0.0.3 =
+* Fixing some bugs in readme.txt.
 
 = 0.0.2 =
 * Initial release.
