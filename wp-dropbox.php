@@ -42,8 +42,7 @@ echo '<div class="wp-dropbox">';
 
 	$showform = True;
 
-	try
-	{
+	try {
 		if (($db_user == '') or ($db_pass == '') )
 			throw new Exception(__('Need to configure plugin!'));
 
@@ -105,16 +104,13 @@ echo '<div class="wp-dropbox">';
 	    }		
 
 	    // Clean up
-	if($delete_file == True)
-		{
+	if($delete_file == True) {
 	    	if (isset($tmpFile) && file_exists($tmpFile))
 	        	unlink($tmpFile);
 		}
-
 	}
 
-	if($showform == True)
-		{
+	if($showform == True) {
 		?>
 	        <form method="POST" enctype="multipart/form-data">
 	            <input type="hidden" name="email" />
