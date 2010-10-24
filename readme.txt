@@ -4,7 +4,7 @@ Donate link:
 Tags: dropbox, upload
 Requires at least: 3.0.0
 Tested up to: 3.0.1
-Stable tag: 0.1.0
+Stable tag: 0.1.1
 
 Inserts a upload form for visitors to upload files to a Dropbox account
 
@@ -34,6 +34,9 @@ Yes indeed, so don't blame me if it breaks.
 1. This is how it looks with Swedish translation on a page in Safari
 
 == Changelog ==
+
+= 0.1.1 =
+* No need to store the users password
 
 = 0.1.0 =
 * Change from CURL to Dropbox native API
