@@ -240,6 +240,8 @@ function show_dropbox()
 </table>
 		</form>
 
+		<br />		
+		<a href="http://www.dropbox.com/referrals/NTI1MDUxNDc5" target="_blank">Need a Dropbox account, pls use this link so I get some extra space.</a>
 
 		</div>
 	<?php }
