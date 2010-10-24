@@ -47,7 +47,7 @@ function show_dropbox()
 
 	$showform = True;
 	try {
-		if (($db_user == '') or ($db_pass == '') )
+		if (($db_token == '') or ($db_secret == '') or ($db_token == '') or ($db_token_secret == '') )
 			throw new Exception(__('Need to configure plugin!'));
 
 		if ($db_allow_ext == '')
@@ -151,27 +151,41 @@ function show_dropbox()
 <?php
 		if( $_POST[ "wp_db_submit_hidden" ] == 'Y' ) {
 				// Check if we should ask Dropbox api for a token for the given user
-				if ( ( get_option( 'db_auth_token' ) == '') OR ( get_option( 'db_auth_token_secret' ) == '') OR ( $_POST[ 'wp_db_username' ] != get_option( 'db_username' ) ) OR ( $_POST[ 'wp_db_password' ] !=  get_option( 'db_password' ) ) ) {
+				if ( trim($_POST[ 'wp_db_password' ]) != '') {
+					$updateAuth = True;
+				}
+				$db_error = False;
+				
+				if ( $updateAuth ) {
 					include 'inc/dropbox.php';
 					$dbupf = new Dropbox($_POST[ 'dbapikey' ],$_POST[ 'dbapisecret' ]);
 					$dbapistuff = $dbupf->token($_POST[ 'wp_db_username' ], $_POST[ 'wp_db_password' ]);
 
-					update_option( 'db_auth_token', $dbapistuff["token"] );
-	        		update_option( 'db_auth_token_secret', $dbapistuff["secret"] );
+					if ( empty( $dbapistuff["error"] ) ) {
+						update_option( 'db_auth_token', $dbapistuff["token"] );
+	        			update_option( 'db_auth_token_secret', $dbapistuff["secret"] );
+					}
+					else {
+						?>
+							<div class="updated"><p><strong><?php echo $dbapistuff["error"]; ?></strong></p></div>							
+						<?php
+						$db_error = True;
+					}
 				}
+				
 		        // Save the posted value in the database
 		        update_option( 'db_username', $_POST[ 'wp_db_username' ] );
-		        update_option( 'db_password', $_POST[ 'wp_db_password' ] );
 		        update_option( 'db_path', $_POST[ 'db_path' ] );
 		        update_option( 'db_temp_path', $_POST[ 'db_temp_path' ] );
 		        update_option( 'db_allow_ext', $_POST[ 'db_allow_ext' ] );
 		        update_option( 'db_key', $_POST[ 'dbapikey' ] );
         		update_option( 'db_secret', $_POST[ 'dbapisecre' ] );
 		        // Put an options updated message on the screen
+		if (!$db_error) {
 		?>
-		<div class="updated"><p><strong><?php _e('Options saved.', 'mt_trans_domain' ); ?></strong></p></div>
+			<div class="updated"><p><strong><?php _e('Options saved. Dropbox connection is okay, no need to update your password again.', 'mt_trans_domain' ); ?></strong></p></div>
 		<?php
-
+		}
 		    }
 ?>
 	        <form name="wp_db_form" method="POST" action="">
@@ -185,7 +199,7 @@ function show_dropbox()
 				</tr>
 				<tr>
 					<th scope="row"><p>Dropbox password.</p></th>
-		            <td><input id="inputid" type="password" size="30" name="wp_db_password" value="<?php echo get_option( 'db_password' ); ?>" />
+		            <td><input id="inputid" type="password" size="30" name="wp_db_password" value="" />
 					<label for="inputid">supersecretpassword</label>
 					</td>
 				</tr>
@@ -210,13 +224,13 @@ function show_dropbox()
 				<tr>
 					<th scope="row"><p>Dropbox API Key.</p></th>
     				<td><input type="text" size="60" name="dbapikey" value="<?php echo get_option( 'db_key' ); ?>" />
-						<label for="inputid"></label>
+						<label for="inputid">https://www.dropbox.com/developers/apps</label>
 					</td>
 				</tr>
 				<tr>
 					<th scope="row"><p>Dropbox API Secret.</p></th>
     				<td><input type="text" size="60" name="dbapisecre" value="<?php echo get_option( 'db_secret' ); ?>" />
-						<label for="inputid"></label>
+						<label for="inputid">https://www.dropbox.com/developers/apps</label>
 					</td>
 				</tr>				
 				<tr>
@@ -252,7 +266,6 @@ function show_dropbox()
 		{
 			remove_shortcode( 'wp-dropbox' );
 	        delete_option( 'db_username' );
-	        delete_option( 'db_password' );
 	        delete_option( 'db_path' );
 	        delete_option( 'db_temp_path' );
 			delete_option( 'db_allow_ext' );	
@@ -265,7 +278,6 @@ function show_dropbox()
 	function register_wp_dropbox_settings() {
 		//register our settings
 		register_setting( 'wp_db-settings-group', 'db_username' );
-		register_setting( 'wp_db-settings-group', 'db_password' );
 		register_setting( 'wp_db-settings-group', 'db_path' );
 		register_setting( 'wp_db-settings-group', 'db_temp_path' );
 		register_setting( 'wp_db-settings-group', 'db_allow_ext' );
