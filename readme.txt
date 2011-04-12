@@ -36,7 +36,7 @@ Yes indeed, so don't blame me if it breaks.
 == Changelog ==
 
 = 0.1.2 =
-*
+* Updated dropbox class to latest version
 
 = 0.1.1 =
 * No need to store the users password
