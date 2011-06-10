@@ -3,8 +3,8 @@ Contributors: Ostlund
 Donate link:
 Tags: dropbox, upload, integration, api, form
 Requires at least: 3.0.0
-Tested up to: 3.0.1
-Stable tag: 0.1.1
+Tested up to: 3.1.3
+Stable tag: 0.1.5
 
 Inserts a upload form for visitors to upload files to a Dropbox account
 
@@ -35,8 +35,11 @@ Yes indeed, so don't blame me if it breaks.
 
 == Changelog ==
 
+= 0.1.5 =
+* Quick bugfix with the new Dropbox class
+
 = 0.1.2 =
-*
+* Updated dropbox class to latest version
 
 = 0.1.1 =
 * No need to store the users password
