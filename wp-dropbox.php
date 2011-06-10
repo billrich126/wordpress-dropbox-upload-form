@@ -5,7 +5,7 @@
 Plugin Name:  Dropbox Upload Form
 Plugin URI:   
 Description:  Use the shortcode [wp-dropbox] in any page to insert a Dropbox file upload form. Kudos to <a href="http://inuse.se">inUse</a> for letting me release this in-house developed plugin under GPL. Use with caution and DON'T blame me if something breaks.
-Version:      0.1.2
+Version:      0.1.1
 Author:       Henrik Östlund
 Author URI:   http://östlund.info/
 
