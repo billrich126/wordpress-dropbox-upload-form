@@ -8,6 +8,9 @@
  * The class is documented in the file itself. If you find any bugs help me out and report them. Reporting can be done by sending an email to php-dropbox-bugs[at]verkoyen[dot]eu.
  * If you report a bug, make sure you give me enough information (include your code).
  *
+ * Changelog since 1.0.5
+ * - Fixed filesPost so it can handle folders with spaces.
+ *
  * Changelog since 1.0.4
  * - Fixed filesPost so it returns a boolean.
  * - Some code styling
@@ -36,7 +39,7 @@
  * This software is provided by the author "as is" and any express or implied warranties, including, but not limited to, the implied warranties of merchantability and fitness for a particular purpose are disclaimed. In no event shall the author be liable for any direct, indirect, incidental, special, exemplary, or consequential damages (including, but not limited to, procurement of substitute goods or services; loss of use, data, or profits; or business interruption) however caused and on any theory of liability, whether in contract, strict liability, or tort (including negligence or otherwise) arising in any way out of the use of this software, even if advised of the possibility of such damage.
  *
  * @author		Tijs Verkoyen <php-dropbox@verkoyen.eu>
- * @version		1.0.5
+ * @version		1.0.6
  *
  * @copyright	Copyright (c), Tijs Verkoyen. All rights reserved.
  * @license		BSD License
@@ -55,7 +58,7 @@ class Dropbox
 	const API_PORT = 443;
 
 	// current version
-	const VERSION = '1.0.5';
+	const VERSION = '1.0.6';
 
 
 	/**
@@ -196,7 +199,7 @@ class Dropbox
 	private function calculateBaseString($url, $method, array $parameters)
 	{
 		// redefine
-		$url = (string) $url;
+		$url = str_replace('%20', ' ', (string) $url);
 		$parameters = (array) $parameters;
 
 		// init var
@@ -429,7 +432,7 @@ class Dropbox
 				$content = '--' . $boundary . "\r\n";
 
 				// set file
-				$content .= 'Content-Disposition: form-data; name=file; filename="' . $fileInfo['basename'] . '"' . "\r\n";
+				$content .= 'Content-Disposition: form-data; name=file; filename="' . rawurldecode($fileInfo['basename']) . '"' . "\r\n";
 				$content .= 'Content-Type: application/octet-stream' . "\r\n";
 				$content .= "\r\n";
 				$content .= file_get_contents($filePath);
@@ -946,7 +949,7 @@ class Dropbox
 		// build url
 		$url = '0/files/';
 		$url .= ($sandbox) ? 'sandbox/' : 'dropbox/';
-		$url .= trim((string) $path, '/');
+		$url .= str_replace(' ', '%20', trim((string) $path, '/'));
 
 		// make the call
 		$return = $this->doCall($url, null, 'POST', $localFile, true, true);
