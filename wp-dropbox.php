@@ -5,7 +5,7 @@
 Plugin Name:  Dropbox Upload Form
 Plugin URI:   
 Description:  Use the shortcode [wp-dropbox] in any page to insert a Dropbox file upload form. Kudos to <a href="http://inuse.se">inUse</a> for letting me release this in-house developed plugin under GPL. Use with caution and DON'T blame me if something breaks.
-Version:      0.1.5
+Version:      0.2.1
 Author:       Henrik Östlund
 Author URI:   http://östlund.info/
 
@@ -28,10 +28,28 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 **************************************************************************/
 
+require_once(ABSPATH .'wp-includes/pluggable.php');
+if ( isset($_REQUEST['db-validate-nonce']) ) $nonce = $_REQUEST['db-validate-nonce'];
+
+if ( (isset($_POST["db-auth-submit"]) OR isset($_GET['authorize']) ) && wp_verify_nonce( $nonce, 'update' ) ) {
+	$options["db_api_key"] = get_option( 'db_key' );
+	$options["db_api_secret"] = get_option( 'db_secret' );
+
+	require_once 'inc/dropbox.php';
+	$dbupf = new \TijsVerkoyen\Dropbox\Dropbox($options['db_api_key'],$options['db_api_secret']);
+	if (!isset($_GET['authorize'])) {
+		$response = $dbupf->oAuthRequestToken();
+		$dbupf->oAuthAuthorize($response['oauth_token'], 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] .'&authorize=true&sig='.$response['oauth_token_secret'] . "&db-validate-nonce=".$nonce);
+	} else {
+		$dbupf->setOAuthTokenSecret($_GET['sig']);
+		$response = $dbupf->oAuthAccessToken($_GET['oauth_token']);
+		update_option( 'db_auth_token', $response["oauth_token"] );
+		update_option( 'db_auth_token_secret', $response["oauth_token_secret"] );
+	}
+}
+
 function show_dropbox()
 {	
-	$db_user = get_option( 'db_username' );
-	$db_pass = get_option( 'db_password' );
 	$dp_path = get_option( 'db_path' );
 	$db_tmp_path = get_option( 'db_temp_path' );
 	$db_allow_ext = trim( get_option( 'db_allow_ext' ) );
@@ -61,8 +79,8 @@ function show_dropbox()
 	if ($_POST['email']) {
 
 	    try {
-			include 'inc/dropbox.php';
-   			$dbupf = new Dropbox($db_key,$db_secret);
+			require_once 'inc/dropbox.php';
+   			$dbupf = new \TijsVerkoyen\Dropbox\Dropbox($db_key,$db_secret);
 			$dbupf->setOAuthToken($db_token);
 			$dbupf->setOAuthTokenSecret($db_token_secret);
 
@@ -119,11 +137,6 @@ function show_dropbox()
 	        echo '<span id="syntax_error">'.__('Error:',wpdbUploadForm) . ' ' . htmlspecialchars($e->getMessage()) . '</span>';
 			$delete_file = False;
 	    }		
-/*
-	   $attachments = array($tmpFile);
-	   $headers = 'From: My Name <myname@mydomain.com>' . "\r\n\\";
-	   wp_mail('henrik@myworld.se', 'subject', 'message', $headers, $attachments);
-*/
 	    // Clean up
 	if($delete_file == True) {
 	    	if (isset($tmpFile) && file_exists($tmpFile))
@@ -150,31 +163,12 @@ function show_dropbox()
 		<p>Make and use a special folder on your Dropbox if you allow public uploads. The date when the file got uploded is appended at the end of the filename, example foo_2010-01-01.pdf just so we don't overwrite files.</p>
 <?php
 		if( $_POST[ "wp_db_submit_hidden" ] == 'Y' ) {
-				// Check if we should ask Dropbox api for a token for the given user
-				if ( trim($_POST[ 'wp_db_password' ]) != '') {
-					$updateAuth = True;
-				}
-				$db_error = False;
-				
-				if ( $updateAuth ) {
-					include 'inc/dropbox.php';
-					$dbupf = new Dropbox($_POST[ 'dbapikey' ],$_POST[ 'dbapisecret' ]);
-					$dbapistuff = $dbupf->token($_POST[ 'wp_db_username' ], $_POST[ 'wp_db_password' ]);
 
-					if ( empty( $dbapistuff["error"] ) ) {
-						update_option( 'db_auth_token', $dbapistuff["token"] );
-	        			update_option( 'db_auth_token_secret', $dbapistuff["secret"] );
-					}
-					else {
-						?>
-							<div class="updated"><p><strong><?php echo $dbapistuff["error"]; ?></strong></p></div>							
-						<?php
-						$db_error = True;
-					}
-				}
+//				update_option( 'db_auth_token', $dbapistuff["token"] );
+//				update_option( 'db_auth_token_secret', $dbapistuff["secret"] );
+
 				
 		        // Save the posted value in the database
-		        update_option( 'db_username', $_POST[ 'wp_db_username' ] );
 		        update_option( 'db_path', $_POST[ 'db_path' ] );
 		        update_option( 'db_temp_path', $_POST[ 'db_temp_path' ] );
 		        update_option( 'db_allow_ext', $_POST[ 'db_allow_ext' ] );
@@ -191,18 +185,6 @@ function show_dropbox()
 	        <form name="wp_db_form" method="POST" action="">
 				<input type="hidden" name="wp_db_submit_hidden" value="Y">	
 <table class="form-table">
-				<tr>
-					<th scope="row"><p>Dropbox username/login.</p></td>
-	            	<td><input id="inputid" type="text" size="30" name="wp_db_username" value="<?php echo get_option( 'db_username' ); ?>" />
-					<label for="inputid">username@foo.bar</label>		
-					</td>
-				</tr>
-				<tr>
-					<th scope="row"><p>Dropbox password.</p></th>
-		            <td><input id="inputid" type="password" size="30" name="wp_db_password" value="" />
-					<label for="inputid">supersecretpassword</label>
-					</td>
-				</tr>
 				<tr>
 					<th scope="row"><p>Path in dropbox folder (please, don't save to root folder).</p></th>
 		            <td><input type="text" size="60" name="db_path" value="<?php echo get_option( 'db_path' ); ?>" />
@@ -239,6 +221,28 @@ function show_dropbox()
 				</tr>					
 </table>
 		</form>
+	    <form action="" method="post">
+	    	<hr />
+	        <h3>Authenticate your Dropbox Account</h3>
+			<?php
+			require_once 'inc/dropbox.php';
+            $dbupf = new \TijsVerkoyen\Dropbox\Dropbox(get_option( 'db_key' ), get_option( 'db_secret' ));
+
+			$dbupf->setOAuthToken(get_option( 'db_auth_token' ));
+			$dbupf->setOAuthTokenSecret(get_option( 'db_auth_token_secret' ));
+
+            $accountinfo = $dbupf->accountInfo();
+
+            if ( empty( $accountinfo["error"] ) ) {
+				echo "<strong>Dropbox är kopplat till kontot: " . $accountinfo["display_name"] . " - " . $accountinfo["email"] . "</strong>";
+            } else {
+            	echo $accountinfo["error"];
+            }
+			?>
+	        <p>You'll need to do this before users can upload files to your dropbox account.</p>
+	    	<?php wp_nonce_field("update", "db-validate-nonce"); ?>
+	        <input type="submit" name="db-auth-submit" class="button" value="<?php _e('Authenticate Account') ?>" />
+	    </form>
 
 		<br />		
 		<a href="http://www.dropbox.com/referrals/NTI1MDUxNDc5" target="_blank">Need a Dropbox account, pls use this link so I get some extra space.</a>
@@ -267,7 +271,6 @@ function show_dropbox()
 	function wp_dropbox_deactivate()
 		{
 			remove_shortcode( 'wp-dropbox' );
-	        delete_option( 'db_username' );
 	        delete_option( 'db_path' );
 	        delete_option( 'db_temp_path' );
 			delete_option( 'db_allow_ext' );	
@@ -279,7 +282,6 @@ function show_dropbox()
 
 	function register_wp_dropbox_settings() {
 		//register our settings
-		register_setting( 'wp_db-settings-group', 'db_username' );
 		register_setting( 'wp_db-settings-group', 'db_path' );
 		register_setting( 'wp_db-settings-group', 'db_temp_path' );
 		register_setting( 'wp_db-settings-group', 'db_allow_ext' );
