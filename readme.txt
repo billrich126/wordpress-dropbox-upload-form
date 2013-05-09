@@ -4,7 +4,7 @@ Donate link:
 Tags: dropbox, upload, integration, api, form
 Requires at least: 3.5.0
 Tested up to: 3.6.0
-Stable tag: 0.2.0
+Stable tag: 0.2.1
 
 Inserts a upload form for visitors to upload files to a Dropbox account
 
@@ -35,7 +35,7 @@ Yes indeed, so don't blame me if it breaks.
 
 == Changelog ==
 
-= 0.2.0 =
+= 0.2.1 =
 * Works with Dropbox API v1
 * Updated dropbox class to latest version
 
