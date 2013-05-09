@@ -2,9 +2,9 @@
 Contributors: Ostlund
 Donate link:
 Tags: dropbox, upload, integration, api, form
-Requires at least: 3.0.0
-Tested up to: 3.1.3
-Stable tag: 0.1.5
+Requires at least: 3.5.0
+Tested up to: 3.6.0
+Stable tag: 0.2.0
 
 Inserts a upload form for visitors to upload files to a Dropbox account
 
@@ -23,7 +23,7 @@ This plugin lets you insert a upload form on your pages so visitors can upload f
 
 = Requirements =
 
-This plugin requires PHP5.
+This plugin requires PHP 5.3, with Curl.
 
 = Is this your first Wordpress plugin =
 
@@ -34,6 +34,10 @@ Yes indeed, so don't blame me if it breaks.
 1. This is how it looks with Swedish translation on a page in Safari
 
 == Changelog ==
+
+= 0.2.0 =
+* Works with Dropbox API v1
+* Updated dropbox class to latest version
 
 = 0.1.5 =
 * Quick bugfix with the new Dropbox class
